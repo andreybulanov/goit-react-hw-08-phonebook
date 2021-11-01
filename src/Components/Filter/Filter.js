@@ -1,41 +1,35 @@
-import { Wrapper, Label, Input } from './Filter.styled';
+import { useSelector, useDispatch } from 'react-redux';
+import { Form, Container } from 'react-bootstrap';
+import { getFilter, getContacts } from '../../Redux/Phonebook/pb-selectors';
+import { changeFilter } from '../../Redux/Phonebook/pb-actions';
 
-function Filter({ filter }) {
-  const onChange = e => {
-    filter(e.target.value);
-  };
+const Filter = () => {
+  const contacts = useSelector(getContacts);
+  const value = useSelector(getFilter);
+  const dispatch = useDispatch();
 
-  return (
-    <Wrapper>
-      <Label htmlFor="filter">Find contacts by name</Label>
-      <Input type="text" name="filter" onChange={onChange} />
-    </Wrapper>
-  );
+  const onChangeHandler = e => dispatch(changeFilter(e.target.value));
+  const onBlurHandler = () => dispatch(changeFilter(''));
+
+  if (contacts.length === 0) {
+    return <h2 style={{display: 'none'}}>Поиск</h2>
+  } else {
+    return (
+      <Container>
+        <Form>
+          <Form.Group>
+            <h2>Найти контакт по имени</h2>
+            <Form.Control
+            type="text"
+              value={value}
+              onChange={onChangeHandler}
+              onBlur={onBlurHandler}
+            />
+          </Form.Group>
+        </Form>
+      </Container>
+    )
+  }
 }
 
 export default Filter;
-
-// Я это оставлю как пример 
-
-// import { useSelector, useDispatch } from 'react-redux';
-// import { filter } from '../../Store/filterSlice';
-// import { getFilter } from '../../Selectors/contacts-selectors';
-// import { Wrapper, Label, Input } from './Filter.styled';
-
-// function Filter() {
-//   const dispatch = useDispatch();
-//   const value = useSelector((state) => getFilter(state));
-//   const onChange = (e) => {
-//     dispatch(filter(e.target.value));
-//   }
-
-//   return (
-//     <Wrapper>
-//       <Label htmlFor="filter">Find contacts by name</Label>
-//       <Input type="text" name="filter" value={value} onChange={onChange} />
-//     </Wrapper>
-//   );
-// }
-
-// export default Filter;
-

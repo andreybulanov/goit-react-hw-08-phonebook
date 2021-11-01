@@ -1,85 +1,34 @@
-import { useState, useEffect } from 'react';
-import {
-  useFetchContactsQuery,
-  useDeleteContactMutation,
-} from '../../Store/contactsSlice';
+import React, { useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { Container, Button, ListGroupItem } from 'react-bootstrap';
+import * as phonebookOperation from '../../Redux/Phonebook/pb-operations';
+import { getFilteredContacts } from '../../Redux/Phonebook/pb-selectors'
 
-import { List, ListItem } from './ContactsList.styled';
-import { Button } from '../Buttons/Buttons.styled';
-import Filter from '../Filter/Filter';
-
-function ContactsList() {
-  const [contacts, setContacts] = useState([]);
-  const { data } = useFetchContactsQuery();
-  const [deleteContact] = useDeleteContactMutation();
+const ContactsList = () => {
+  const contacts = useSelector(getFilteredContacts);
+  const dispatch = useDispatch();
 
   useEffect(() => {
-    if (data) {
-      setContacts(data);
-    }
-  }, [data]);
+    dispatch(phonebookOperation.fetchContactsAction());
+  }, [dispatch]);
 
-  const onFilterContacts = filter => {
-    if (filter) {
-      const normalizeFilter = filter.toLowerCase();
-      const filterValue = contacts.filter(({ name }) =>
-        name.toLowerCase().includes(normalizeFilter),
-      );
+  const onDeleteContacts = id => dispatch(phonebookOperation.deleteContactsAction(id));
 
-      setContacts(filterValue);
-    } else {
-      setContacts(data);
-    }
-  };
-
-  return (
-    <div>
-      <Filter filter={onFilterContacts} />
-      <List>
+  if (contacts.length === 0) {
+    return <h2 className="nome-title">Контактов в списке нет</h2>
+  } else {
+    return (
+      <Container>
+        <h2>Список контактов</h2>
         {contacts.map(({ id, name, number }) => (
-          <ListItem key={id}>
-            {name} - {number}{' '}
-            <Button type="button" onClick={() => deleteContact(id)}>
-              Delete
-            </Button>
-          </ListItem>
+          <ListGroupItem key={id}>
+            {name} : {number}
+            <Button onClick={() => onDeleteContacts(id)}>Удалить</Button>
+          </ListGroupItem>
         ))}
-      </List>
-    </div>
-  );
-}
+      </Container>
+    );
+  }
+};
 
 export default ContactsList;
-
-// Я это оставлю как пример
-
-// import { useSelector } from 'react-redux';
-// import { useFetchContactsQuery, useDeleteContactMutation } from '../../Store/contactsSlice';
-// import { getFilter } from '../../Selectors/contacts-selectors';
-// import { List, ListItem } from './ContactsList.styled';
-// import { Button } from '../Buttons/Buttons.styled';
-
-// function ContactsList() {
-//   const { data: contacts } = useFetchContactsQuery();
-//   const [deleteContact] = useDeleteContactMutation();
-//   const filterValue = useSelector(state => getFilter(state));
-//   contacts.filter(contact => contact.name.toLowerCase().includes(filterValue));
-  
-
-//   return (
-//     <>
-//       <List>
-//         {contacts.map(({ id, name, number}) => (
-//           <ListItem key={id}>
-//               {name} - {number}{' '}
-//               <Button type="button" onClick={() => deleteContact(id)}>
-//                 Delete
-//               </Button>
-//             </ListItem>
-//         ))}
-//       </List>
-//     </>
-//   );
-// }
-
-// export default ContactsList;
